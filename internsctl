@@ -1,0 +1,124 @@
+#!/bin/bash
+
+VERSION="0.1.0"
+
+show_help() {
+    echo "Usage: script.sh [OPTIONS]"
+    echo "Options:"
+    echo "  --help                   Display this help message"
+    echo "  --version                Display version information"
+    echo "  cpu getinfo              Display information about the CPU using lscpu"
+    echo "  memory getinfo           Display information about memory using free"
+    echo "  user create <username>   Create a new user"
+    echo "  user list                List all users"
+    echo "  user list --sudo-only    List only sudo users"
+    echo "  file getinfo [options]   Get information about a file"
+    echo "    --size, -s             Print file size"
+    echo "    --permissions, -p      Print file permissions"
+    echo "    --owner, -o            Print file owner"
+    echo "    --last-modified, -m    Print last modified time"
+}
+
+file_getinfo() {
+    if [ -z "$4" ]; then
+        echo "Error: Missing file name. Usage: file getinfo [options] <file-name>"
+        exit 1
+    fi
+
+    file_name="$4"
+
+    # Process options
+    if [ "$#" -gt 2 ]; then
+        case "$3" in
+            --size | -s)
+                echo "File Size: $(du -h "$file_name" | cut -f1)"
+                ;;
+            --permissions | -p)
+                echo "File Permissions: $(stat -c %A "$file_name")"
+                ;;
+            --owner | -o)
+                echo "File Owner: $(stat -c %U "$file_name")"
+                ;;
+            --last-modified | -m)
+                echo "Last Modified Time: $(stat -c %y "$file_name")"
+                ;;
+            *)
+                echo "Invalid option: $3"
+                exit 1
+                ;;
+        esac
+    fi
+}
+
+# Check if no arguments are provided and display help
+if [ $# -eq 0 ]; then
+    show_help
+    exit 1
+fi
+
+case "$1" in
+    --help)
+        show_help
+        exit 0
+        ;;
+    --version)
+        echo "Script Version: $VERSION"
+        exit 0
+        ;;
+    cpu)
+        case "$2" in
+            getinfo)
+                lscpu
+                exit 0
+                ;;
+            *)
+                echo "Invalid argument for 'cpu'. Use 'cpu getinfo'."
+                exit 1
+                ;;
+        esac
+        ;;
+    memory)
+        case "$2" in
+            getinfo)
+                free
+                exit 0
+                ;;
+            *)
+                echo "Invalid argument for 'memory'. Use 'memory getinfo'."
+                exit 1
+                ;;
+        esac
+        ;;
+    user)
+        case "$2" in
+            create)
+                if [ -z "$3" ]; then
+                    echo "Error: Missing username. Usage: user create <username>"
+                    exit 1
+                fi
+                sudo useradd "$3"
+                echo "User $3 created successfully."
+                exit 0
+                ;;
+            list)
+                if [ "$3" == "--sudo-only" ]; then
+                    getent group sudo | cut -d: -f4 | tr ',' '\n'
+                else
+                    getent passwd | cut -d: -f1
+                fi
+                exit 0
+                ;;
+            *)
+                echo "Invalid argument for 'user'. Use 'user create <username>' or 'user list [--sudo-only]'."
+                exit 1
+                ;;
+        esac
+        ;;
+    file)
+        file_getinfo "$@"
+        ;;
+    *)
+        echo "Invalid command. Use --help for usage information."
+        exit 1
+        ;;
+esac
