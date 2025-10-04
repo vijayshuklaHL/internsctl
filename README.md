@@ -3,6 +3,7 @@
 **`internsctl`** is a lightweight custom Linux command-line tool written in **Bash**, designed for system information and user management tasks.
 
 > **Author:** Vijay Shukla
+
 > **Files:**
 >
 > * `internsctl` → Bash script (main executable)
