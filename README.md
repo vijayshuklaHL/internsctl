@@ -4,7 +4,7 @@ internsctl-man.gz (man file)**
 
 # internsctl
 internsctl command tool for linux
-written By: Isha Atri
+written By: Vijay Shukla
 
 
 Usage: internsctl [OPTIONS]
